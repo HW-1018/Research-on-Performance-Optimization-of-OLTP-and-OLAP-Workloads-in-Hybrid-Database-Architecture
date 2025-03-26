@@ -66,4 +66,79 @@ project/
 └── README.md                  
 
 ```
+## 3. 專案特色
 
+- ✅ **模擬真實交易情境：** 以 Faker 自動產生 10 萬筆交易資料，還原銀行系統日常操作
+- 🔄 **支援 OLTP / OLAP / Hybrid 操作：** 可依比例模擬實務環境下的混合查詢負載
+- 📊 **效能觀測與分析：** 透過 JMeter + Python 分析 CPU 使用率與查詢回應
+- 🐳 **Docker 部署快速：** 採用 SingleStore Docker 映像，即時部署測試環境
+
+---
+
+### 3.1 實驗結果摘要
+
+- **OLTP 效能佳**：在單核心與四核心下皆展現穩定表現，但高頻繁操作下易出現延遲
+- **OLAP 資源密集**：屬計算密集型，需仰賴多核心提升效能，在查詢複雜度高時耗費更多時間
+- **Hybrid 模式效果最佳**：在 50:50 或 70:30（偏向 OLTP）混合情況下，整體吞吐與 CPU 使用效率最佳
+- **高頻情境下趨近飽和**：Hybrid 模式能達成調度與計算間平衡，維持效能穩定性
+
+---
+
+### 3.2 單核心與四核心比較分析
+
+>（⬇ 此處可插入圖片）
+
+#### Throughput 與 Response Time（低頻 vs 高頻）：
+
+- **單核心低頻情況下：**
+  - OLTP 吞吐量最高，Hybrid 模式介於中間；OLAP 表現較差。
+  - Response time 方面，OLTP 最快（28ms），OLAP 最慢（42ms），Hybrid 穩定（36~40ms）。
+
+- **單核心高頻下：**
+  - 所有模式 CPU 幾近飽和，OLTP throughput 下滑明顯，Hybrid 仍略有優勢（26.59 req/sec）。
+  - Hybrid 模式在 response time（37ms）上與 OLTP/OLAP 相當，但穩定性較好。
+
+- **多核心低頻情況：**
+  - 所有模式 throughput 倍數提升，OLTP 明顯最高（180 req/sec 以上）。
+  - Hybrid 7:3 模式兼具 throughput（122.869）與回應速度（8ms）。
+
+- **多核心高頻下：**
+  - 所有模式 CPU 幾近滿載（8 核心 ≒ 800%）。Hybrid 模式在 throughput 與 response time 仍保持平衡。
+
+---
+
+#### CPU 使用率分析：
+
+>（⬇ 此處可插入圖片）
+
+- **單核心 + 低頻：**
+  - OLAP 使用率最高（53.53%），OLTP 約 33.64%，Hybrid 明顯較低（17~19%）。
+  - 顯示 Hybrid 可有效降低單核心下的排程壓力與 context switching。
+
+- **單核心 + 高頻：**
+  - 所有模式 CPU 幾乎達到 100%，處於系統瓶頸狀態。
+  - Hybrid 模式能與 OLTP/OLAP 均衡分配資源（平均使用率均在 100% 附近）。
+
+- **多核心 + 低頻：**
+  - OLAP 明顯吃掉大部分資源（84.29%），Hybrid 模式平均分配負載（31~34%）。
+  - OLTP 使用率最輕，顯示其主要由大量 I/O 與頻繁切換造成效能瓶頸。
+
+- **多核心 + 高頻：**
+  - 所有模式 CPU 使用率都很高，OLAP 達到近 280%，Hybrid 模式（50:50）分配均勻最穩定。
+
+> **結論：Hybrid 模式在多核環境中有明顯平衡效能與資源利用的優勢，特別是在高頻高負載情況下能維持穩定的 throughput 與 response time。**
+
+>（⬇ 此處可插入圖片）
+
+#### 單核心情境：
+- Hybrid 模式在低頻下的 throughput 落在 OLTP 和 OLAP 之間，但在高頻下表現**略優於純 OLTP 和純 OLAP**。
+- 在高頻下，**OLTP throughput 明顯下降**，而 Hybrid 模式在維持 response time 穩定方面具有優勢（37ms）。
+
+#### 四核心情境：
+- 在多核心下，所有模式 throughput 都顯著提升。
+- **Hybrid (7:3)** 模式在高低頻下 throughput 最佳，且 response time 保持在 8ms。
+- **OLTP 在多核下未能完全利用計算能力**，其主要負擔來自 I/O 與 context switching，而非純運算。
+
+> 整體來說，Hybrid 模式能充分利用多核心環境與混合負載特性，呈現**效能與延遲的最佳平衡**。
+
+---
