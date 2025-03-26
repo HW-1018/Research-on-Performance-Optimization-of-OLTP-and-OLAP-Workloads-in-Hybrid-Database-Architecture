@@ -84,11 +84,11 @@ project/
 
 ---
 
-### 3.2 單核心與四核心比較分析
+## 4. 單核心與四核心比較分析
 
 >（⬇ 此處可插入圖片）
 
-#### Throughput 與 Response Time（低頻 vs 高頻）：
+### 4.1 Throughput 與 Response Time（低頻 vs 高頻）：
 
 - **單核心低頻情況下：**
   - OLTP 吞吐量最高，Hybrid 模式介於中間；OLAP 表現較差。
@@ -107,7 +107,7 @@ project/
 
 ---
 
-#### CPU 使用率分析：
+### 4.2 CPU 使用率分析：
 
 >（⬇ 此處可插入圖片）
 
