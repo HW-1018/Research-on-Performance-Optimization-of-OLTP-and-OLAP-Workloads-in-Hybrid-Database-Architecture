@@ -20,3 +20,17 @@
 ## 2. 專案結構
 
 建議的專案目錄結構如下：
+```bash
+project/
+│
+├── Dockerfile
+├── docker-compose.yml
+├── requirements.txt                
+├── src                  #
+  ├── initialize
+  ├── operator
+  └── turn_into_graph
+└── README.md                  
+
+```
+
