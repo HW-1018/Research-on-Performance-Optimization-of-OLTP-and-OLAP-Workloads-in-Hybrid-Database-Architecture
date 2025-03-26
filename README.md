@@ -57,6 +57,7 @@ docker run -d \
 ```bash
 project/
 │
+├── JMeter_setting
 ├── docs                 # 實驗結果及圖片
 ├── requirements.txt     # python套件         
 ├── src                  
