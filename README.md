@@ -57,13 +57,12 @@ docker run -d \
 ```bash
 project/
 │
-├── Dockerfile
-├── docker-compose.yml
-├── requirements.txt                
-├── src                  #
-  ├── initialize
-  ├── operator
-  └── turn_into_graph
+├── docs                 # 實驗結果及圖片
+├── requirements.txt     # python套件         
+├── src                  
+  ├── initialize         # 初始化和刪除在singlestore的資料集
+  ├── operator           # OLTP, OLAP, HYBRID 的 operation
+  └── turn_into_graph    # 把測試的結果轉為圖片
 └── README.md                  
 
 ```
