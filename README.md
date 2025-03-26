@@ -87,7 +87,7 @@ project/
 
 ## 4. 單核心與四核心比較分析
 
->（⬇ 此處可插入圖片）
+> ![single core](docs/single_core.png)  ![quad core](docs/quad_core.png)
 
 ### 4.1 Throughput 與 Response Time（低頻 vs 高頻）：
 
