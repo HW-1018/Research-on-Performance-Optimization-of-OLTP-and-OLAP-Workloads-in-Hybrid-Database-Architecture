@@ -87,9 +87,9 @@ project/
 
 ## 4. 單核心與四核心比較分析
 
-> ![single core](docs/single_core.png)  ![quad core](docs/quad_core.png)
-
 ### 4.1 Throughput 與 Response Time（低頻 vs 高頻）：
+
+> ![single core](docs/single_core.png)  ![quad core](docs/quad_core.png)
 
 - **單核心低頻情況下：**
   - OLTP 吞吐量最高，Hybrid 模式介於中間；OLAP 表現較差。
@@ -110,12 +110,12 @@ project/
 
 ### 4.2 CPU 使用率分析：
 
->（⬇ 此處可插入圖片）
+> ![單核低頻](docs/單核_低頻.png)
 
 - **單核心 + 低頻：**
   - OLAP 使用率最高（53.53%），OLTP 約 33.64%，Hybrid 明顯較低（17~19%）。
   - 顯示 Hybrid 可有效降低單核心下的排程壓力與 context switching。
-
+    
 - **單核心 + 高頻：**
   - 所有模式 CPU 幾乎達到 100%，處於系統瓶頸狀態。
   - Hybrid 模式能與 OLTP/OLAP 均衡分配資源（平均使用率均在 100% 附近）。
