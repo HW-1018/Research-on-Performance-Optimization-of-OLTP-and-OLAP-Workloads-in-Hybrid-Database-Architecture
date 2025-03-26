@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="advanced database Plan OLTP">
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="使用者自訂變數">
+        <collectionProp name="Arguments.arguments"/>
+      </elementProp>
+    </TestPlan>
+    <hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="執行緒群組">
+        <intProp name="ThreadGroup.num_threads">1</intProp>
+        <intProp name="ThreadGroup.ramp_time">1</intProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="迴圈控制器">
+          <stringProp name="LoopController.loops">1</stringProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="迴圈控制器">
+          <stringProp name="LoopController.loops">1</stringProp>
+        </LoopController>
+        <hashTree>
+          <JDBCDataSource guiclass="TestBeanGUI" testclass="JDBCDataSource" testname="JDBC 連線設定">
+            <stringProp name="dataSource">t2</stringProp>
+            <stringProp name="poolMax">0</stringProp>
+            <stringProp name="timeout">10000</stringProp>
+            <stringProp name="trimInterval">60000</stringProp>
+            <boolProp name="autocommit">true</boolProp>
+            <stringProp name="transactionIsolation">DEFAULT</stringProp>
+            <boolProp name="preinit">false</boolProp>
+            <stringProp name="initQuery"></stringProp>
+            <boolProp name="keepAlive">true</boolProp>
+            <stringProp name="connectionAge">5000</stringProp>
+            <stringProp name="checkQuery"></stringProp>
+            <stringProp name="dbUrl">jdbc:mysql://127.0.0.1:3306/BANK?useSSL=false</stringProp>
+            <stringProp name="driver">com.mysql.cj.jdbc.Driver</stringProp>
+            <stringProp name="username">root</stringProp>
+            <stringProp name="password">6hCuZjcxApyFtNCMjJS03CzA0QuqEPOI</stringProp>
+            <stringProp name="connectionProperties"></stringProp>
+          </JDBCDataSource>
+          <hashTree/>
+          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="OLTP_隨機插入一筆新交易紀錄">
+            <stringProp name="dataSource">t2</stringProp>
+            <stringProp name="queryType">Update Statement</stringProp>
+            <stringProp name="query">INSERT INTO BankTransactions 
+    (AccountID, TransactionType, TransactionDate, Amount, BalanceAfterTransaction, CounterpartyAccount, Description, TransactionStatus, Fee)
+VALUES 
+    (FLOOR(RAND() * 1000000000 + 100000000), 
+     CASE FLOOR(RAND() * 3) 
+         WHEN 0 THEN &apos;Deposit&apos; 
+         WHEN 1 THEN &apos;Withdrawal&apos; 
+         ELSE &apos;Transfer&apos; 
+     END, 
+     NOW(), 
+     ROUND(RAND() * 1000, 2), 
+     ROUND(RAND() * 10000, 2), 
+     IF(FLOOR(RAND() * 2) = 1, FLOOR(RAND() * 1000000000 + 100000000), NULL), 
+     CONCAT(&apos;Transaction &apos;, FLOOR(RAND() * 1000)), 
+     &apos;Completed&apos;, 
+     ROUND(RAND() * 10, 2)
+    );</stringProp>
+            <stringProp name="queryArguments"></stringProp>
+            <stringProp name="queryArgumentsTypes"></stringProp>
+            <stringProp name="variableNames"></stringProp>
+            <stringProp name="resultVariable"></stringProp>
+            <stringProp name="queryTimeout"></stringProp>
+            <stringProp name="resultSetMaxRows"></stringProp>
+            <stringProp name="resultSetHandler">Store as String</stringProp>
+          </JDBCSampler>
+          <hashTree/>
+          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="OLTP_隨機更新特定交易的狀態">
+            <stringProp name="dataSource">t2</stringProp>
+            <stringProp name="queryType">Update Statement</stringProp>
+            <stringProp name="query">UPDATE BankTransactions
+SET TransactionStatus = CASE FLOOR(RAND() * 2)
+                          WHEN 0 THEN &apos;Completed&apos;
+                          ELSE &apos;Failed&apos;
+                       END
+WHERE TransactionID = FLOOR(RAND() * 1000) + 1;
+</stringProp>
+            <stringProp name="queryArguments"></stringProp>
+            <stringProp name="queryArgumentsTypes"></stringProp>
+            <stringProp name="variableNames"></stringProp>
+            <stringProp name="resultVariable"></stringProp>
+            <stringProp name="queryTimeout"></stringProp>
+            <stringProp name="resultSetMaxRows"></stringProp>
+            <stringProp name="resultSetHandler">Store as String</stringProp>
+          </JDBCSampler>
+          <hashTree/>
+          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="OLTP_隨機刪除某筆交易紀錄">
+            <stringProp name="dataSource">t2</stringProp>
+            <stringProp name="queryType">Update Statement</stringProp>
+            <stringProp name="query">DELETE FROM BankTransactions
+WHERE TransactionID = FLOOR(RAND() * 1000) + 1;
+</stringProp>
+            <stringProp name="queryArguments"></stringProp>
+            <stringProp name="queryArgumentsTypes"></stringProp>
+            <stringProp name="variableNames"></stringProp>
+            <stringProp name="resultVariable"></stringProp>
+            <stringProp name="queryTimeout"></stringProp>
+            <stringProp name="resultSetMaxRows"></stringProp>
+            <stringProp name="resultSetHandler">Store as String</stringProp>
+          </JDBCSampler>
+          <hashTree/>
+          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="OLTP_查詢指定帳戶最近的交易紀錄">
+            <stringProp name="dataSource">t2</stringProp>
+            <stringProp name="queryType">Select Statement</stringProp>
+            <stringProp name="query">SELECT *
+FROM BankTransactions
+WHERE AccountID = FLOOR(RAND() * 1000000000 + 100000000)
+ORDER BY TransactionDate DESC
+LIMIT 5;
+</stringProp>
+            <stringProp name="queryArguments"></stringProp>
+            <stringProp name="queryArgumentsTypes"></stringProp>
+            <stringProp name="variableNames"></stringProp>
+            <stringProp name="resultVariable"></stringProp>
+            <stringProp name="queryTimeout"></stringProp>
+            <stringProp name="resultSetMaxRows"></stringProp>
+            <stringProp name="resultSetHandler">Store as String</stringProp>
+          </JDBCSampler>
+          <hashTree/>
+          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="OLTP_隨機更新交易手續費資訊">
+            <stringProp name="dataSource">t2</stringProp>
+            <stringProp name="queryType">Update Statement</stringProp>
+            <stringProp name="query">UPDATE BankTransactions
+SET Fee = ROUND(RAND() * 20, 2)
+WHERE TransactionType = &apos;Withdrawal&apos; 
+  AND TransactionDate &gt;= DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 7 + 1) DAY);
+</stringProp>
+            <stringProp name="queryArguments"></stringProp>
+            <stringProp name="queryArgumentsTypes"></stringProp>
+            <stringProp name="variableNames"></stringProp>
+            <stringProp name="resultVariable"></stringProp>
+            <stringProp name="queryTimeout"></stringProp>
+            <stringProp name="resultSetMaxRows"></stringProp>
+            <stringProp name="resultSetHandler">Store as String</stringProp>
+          </JDBCSampler>
+          <hashTree/>
+          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="OLTP_隨機新增對方帳戶的轉帳交易">
+            <stringProp name="dataSource">t2</stringProp>
+            <stringProp name="queryType">Update Statement</stringProp>
+            <stringProp name="query">INSERT INTO BankTransactions
+    (AccountID, TransactionType, TransactionDate, Amount, BalanceAfterTransaction, CounterpartyAccount, Description, TransactionStatus, Fee)
+VALUES 
+    (FLOOR(RAND() * 1000000000 + 100000000), 
+     &apos;Transfer&apos;, 
+     NOW(), 
+     ROUND(RAND() * 500, 2), 
+     ROUND(RAND() * 10000, 2), 
+     FLOOR(RAND() * 1000000000 + 100000000), 
+     &apos;Transfer to Account &apos; || FLOOR(RAND() * 1000000), 
+     &apos;Completed&apos;, 
+     ROUND(RAND() * 5, 2));
+</stringProp>
+            <stringProp name="queryArguments"></stringProp>
+            <stringProp name="queryArgumentsTypes"></stringProp>
+            <stringProp name="variableNames"></stringProp>
+            <stringProp name="resultVariable"></stringProp>
+            <stringProp name="queryTimeout"></stringProp>
+            <stringProp name="resultSetMaxRows"></stringProp>
+            <stringProp name="resultSetHandler">Store as String</stringProp>
+          </JDBCSampler>
+          <hashTree/>
+          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="OLTP_查詢每個帳戶總交易金額和次數">
+            <stringProp name="dataSource">t2</stringProp>
+            <stringProp name="queryType">Select Statement</stringProp>
+            <stringProp name="query">SELECT 
+    AccountID, 
+    COUNT(*) AS TransactionCount, 
+    SUM(Amount) AS TotalTransactionAmount
+FROM 
+    BankTransactions
+WHERE 
+    TransactionDate &gt;= DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 30 + 1) DAY)
+GROUP BY 
+    AccountID
+ORDER BY 
+    TotalTransactionAmount DESC;
+</stringProp>
+            <stringProp name="queryArguments"></stringProp>
+            <stringProp name="queryArgumentsTypes"></stringProp>
+            <stringProp name="variableNames"></stringProp>
+            <stringProp name="resultVariable"></stringProp>
+            <stringProp name="queryTimeout"></stringProp>
+            <stringProp name="resultSetMaxRows"></stringProp>
+            <stringProp name="resultSetHandler">Store as String</stringProp>
+          </JDBCSampler>
+          <hashTree/>
+          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="OLTP_隨機刪除特定時間範圍內的已取消交易">
+            <stringProp name="dataSource">t2</stringProp>
+            <stringProp name="queryType">Update Statement</stringProp>
+            <stringProp name="query">DELETE FROM BankTransactions
+WHERE TransactionStatus = &apos;Cancelled&apos; 
+AND TransactionDate BETWEEN DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 10 + 1) DAY) 
+                        AND NOW();
+</stringProp>
+            <stringProp name="queryArguments"></stringProp>
+            <stringProp name="queryArgumentsTypes"></stringProp>
+            <stringProp name="variableNames"></stringProp>
+            <stringProp name="resultVariable"></stringProp>
+            <stringProp name="queryTimeout"></stringProp>
+            <stringProp name="resultSetMaxRows"></stringProp>
+            <stringProp name="resultSetHandler">Store as String</stringProp>
+          </JDBCSampler>
+          <hashTree/>
+        </hashTree>
+      </hashTree>
+      <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report">
+        <boolProp name="ResultCollector.error_logging">false</boolProp>
+        <objProp>
+          <name>saveConfig</name>
+          <value class="SampleSaveConfiguration">
+            <time>true</time>
+            <latency>true</latency>
+            <timestamp>true</timestamp>
+            <success>true</success>
+            <label>true</label>
+            <code>true</code>
+            <message>true</message>
+            <threadName>true</threadName>
+            <dataType>true</dataType>
+            <encoding>false</encoding>
+            <assertions>true</assertions>
+            <subresults>true</subresults>
+            <responseData>false</responseData>
+            <samplerData>false</samplerData>
+            <xml>false</xml>
+            <fieldNames>true</fieldNames>
+            <responseHeaders>false</responseHeaders>
+            <requestHeaders>false</requestHeaders>
+            <responseDataOnError>false</responseDataOnError>
+            <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+            <assertionsResultsToSave>0</assertionsResultsToSave>
+            <bytes>true</bytes>
+            <sentBytes>true</sentBytes>
+            <url>true</url>
+            <threadCounts>true</threadCounts>
+            <idleTime>true</idleTime>
+            <connectTime>true</connectTime>
+          </value>
+        </objProp>
+        <stringProp name="filename"></stringProp>
+      </ResultCollector>
+      <hashTree/>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>

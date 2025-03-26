@@ -1,0 +1,539 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="advanced database Plan Hybrid">
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="使用者自訂變數">
+        <collectionProp name="Arguments.arguments"/>
+      </elementProp>
+      <stringProp name="TestPlan.user_define_classpath">D:\apache-jmeter-5.6.3\apache-jmeter-5.6.3\bin\ApacheJMeter.jar</stringProp>
+    </TestPlan>
+    <hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="執行緒群組">
+        <intProp name="ThreadGroup.num_threads">1</intProp>
+        <stringProp name="ThreadGroup.ramp_time">0.01</stringProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="迴圈控制器">
+          <intProp name="LoopController.loops">-1</intProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="迴圈控制器">
+          <stringProp name="LoopController.loops">10</stringProp>
+        </LoopController>
+        <hashTree>
+          <JDBCDataSource guiclass="TestBeanGUI" testclass="JDBCDataSource" testname="JDBC 連線設定">
+            <stringProp name="dataSource">t3</stringProp>
+            <stringProp name="poolMax">0</stringProp>
+            <stringProp name="timeout">10000</stringProp>
+            <stringProp name="trimInterval">60000</stringProp>
+            <boolProp name="autocommit">true</boolProp>
+            <stringProp name="transactionIsolation">DEFAULT</stringProp>
+            <boolProp name="preinit">false</boolProp>
+            <stringProp name="initQuery"></stringProp>
+            <boolProp name="keepAlive">true</boolProp>
+            <stringProp name="connectionAge">5000</stringProp>
+            <stringProp name="checkQuery"></stringProp>
+            <stringProp name="dbUrl">jdbc:mysql://127.0.0.1:3306/BANK?useSSL=false</stringProp>
+            <stringProp name="driver">com.mysql.cj.jdbc.Driver</stringProp>
+            <stringProp name="username">root</stringProp>
+            <stringProp name="password">6hCuZjcxApyFtNCMjJS03CzA0QuqEPOI</stringProp>
+            <stringProp name="connectionProperties"></stringProp>
+          </JDBCDataSource>
+          <hashTree/>
+          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="OLTP_隨機插入一筆新交易紀錄">
+            <stringProp name="dataSource">t3</stringProp>
+            <stringProp name="queryType">Update Statement</stringProp>
+            <stringProp name="query">INSERT INTO BankTransactions 
+    (AccountID, TransactionType, TransactionDate, Amount, BalanceAfterTransaction, CounterpartyAccount, Description, TransactionStatus, Fee)
+VALUES 
+    (FLOOR(RAND() * 1000000000 + 100000000), 
+     CASE FLOOR(RAND() * 3) 
+         WHEN 0 THEN &apos;Deposit&apos; 
+         WHEN 1 THEN &apos;Withdrawal&apos; 
+         ELSE &apos;Transfer&apos; 
+     END, 
+     NOW(), 
+     ROUND(RAND() * 1000, 2), 
+     ROUND(RAND() * 10000, 2), 
+     IF(FLOOR(RAND() * 2) = 1, FLOOR(RAND() * 1000000000 + 100000000), NULL), 
+     CONCAT(&apos;Transaction &apos;, FLOOR(RAND() * 1000)), 
+     &apos;Completed&apos;, 
+     ROUND(RAND() * 10, 2)
+    );</stringProp>
+            <stringProp name="queryArguments"></stringProp>
+            <stringProp name="queryArgumentsTypes"></stringProp>
+            <stringProp name="variableNames"></stringProp>
+            <stringProp name="resultVariable"></stringProp>
+            <stringProp name="queryTimeout"></stringProp>
+            <stringProp name="resultSetMaxRows"></stringProp>
+            <stringProp name="resultSetHandler">Store as String</stringProp>
+          </JDBCSampler>
+          <hashTree/>
+          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="OLTP_隨機更新特定交易的狀態">
+            <stringProp name="dataSource">t3</stringProp>
+            <stringProp name="queryType">Update Statement</stringProp>
+            <stringProp name="query">UPDATE BankTransactions
+SET TransactionStatus = CASE FLOOR(RAND() * 2)
+                          WHEN 0 THEN &apos;Completed&apos;
+                          ELSE &apos;Failed&apos;
+                       END
+WHERE TransactionID = FLOOR(RAND() * 1000) + 1;
+</stringProp>
+            <stringProp name="queryArguments"></stringProp>
+            <stringProp name="queryArgumentsTypes"></stringProp>
+            <stringProp name="variableNames"></stringProp>
+            <stringProp name="resultVariable"></stringProp>
+            <stringProp name="queryTimeout"></stringProp>
+            <stringProp name="resultSetMaxRows"></stringProp>
+            <stringProp name="resultSetHandler">Store as String</stringProp>
+          </JDBCSampler>
+          <hashTree/>
+          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="OLTP_隨機刪除某筆交易紀錄">
+            <stringProp name="dataSource">t3</stringProp>
+            <stringProp name="queryType">Update Statement</stringProp>
+            <stringProp name="query">DELETE FROM BankTransactions
+WHERE TransactionID = FLOOR(RAND() * 1000) + 1;
+</stringProp>
+            <stringProp name="queryArguments"></stringProp>
+            <stringProp name="queryArgumentsTypes"></stringProp>
+            <stringProp name="variableNames"></stringProp>
+            <stringProp name="resultVariable"></stringProp>
+            <stringProp name="queryTimeout"></stringProp>
+            <stringProp name="resultSetMaxRows"></stringProp>
+            <stringProp name="resultSetHandler">Store as String</stringProp>
+          </JDBCSampler>
+          <hashTree/>
+          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="OLTP_查詢指定帳戶最近的交易紀錄">
+            <stringProp name="dataSource">t3</stringProp>
+            <stringProp name="queryType">Select Statement</stringProp>
+            <stringProp name="query">SELECT *
+FROM BankTransactions
+WHERE AccountID = FLOOR(RAND() * 1000000000 + 100000000)
+ORDER BY TransactionDate DESC
+LIMIT 5;
+</stringProp>
+            <stringProp name="queryArguments"></stringProp>
+            <stringProp name="queryArgumentsTypes"></stringProp>
+            <stringProp name="variableNames"></stringProp>
+            <stringProp name="resultVariable"></stringProp>
+            <stringProp name="queryTimeout"></stringProp>
+            <stringProp name="resultSetMaxRows"></stringProp>
+            <stringProp name="resultSetHandler">Store as String</stringProp>
+          </JDBCSampler>
+          <hashTree/>
+          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="OLTP_隨機更新交易手續費資訊">
+            <stringProp name="dataSource">t3</stringProp>
+            <stringProp name="queryType">Update Statement</stringProp>
+            <stringProp name="query">UPDATE BankTransactions
+SET Fee = ROUND(RAND() * 20, 2)
+WHERE TransactionType = &apos;Withdrawal&apos; 
+  AND TransactionDate &gt;= DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 7 + 1) DAY);
+</stringProp>
+            <stringProp name="queryArguments"></stringProp>
+            <stringProp name="queryArgumentsTypes"></stringProp>
+            <stringProp name="variableNames"></stringProp>
+            <stringProp name="resultVariable"></stringProp>
+            <stringProp name="queryTimeout"></stringProp>
+            <stringProp name="resultSetMaxRows"></stringProp>
+            <stringProp name="resultSetHandler">Store as String</stringProp>
+          </JDBCSampler>
+          <hashTree/>
+          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="OLTP_隨機新增對方帳戶的轉帳交易">
+            <stringProp name="dataSource">t3</stringProp>
+            <stringProp name="queryType">Update Statement</stringProp>
+            <stringProp name="query">INSERT INTO BankTransactions
+    (AccountID, TransactionType, TransactionDate, Amount, BalanceAfterTransaction, CounterpartyAccount, Description, TransactionStatus, Fee)
+VALUES 
+    (FLOOR(RAND() * 1000000000 + 100000000), 
+     &apos;Transfer&apos;, 
+     NOW(), 
+     ROUND(RAND() * 500, 2), 
+     ROUND(RAND() * 10000, 2), 
+     FLOOR(RAND() * 1000000000 + 100000000), 
+     &apos;Transfer to Account &apos; || FLOOR(RAND() * 1000000), 
+     &apos;Completed&apos;, 
+     ROUND(RAND() * 5, 2));
+</stringProp>
+            <stringProp name="queryArguments"></stringProp>
+            <stringProp name="queryArgumentsTypes"></stringProp>
+            <stringProp name="variableNames"></stringProp>
+            <stringProp name="resultVariable"></stringProp>
+            <stringProp name="queryTimeout"></stringProp>
+            <stringProp name="resultSetMaxRows"></stringProp>
+            <stringProp name="resultSetHandler">Store as String</stringProp>
+          </JDBCSampler>
+          <hashTree/>
+          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="OLTP_查詢每個帳戶總交易金額和次數">
+            <stringProp name="dataSource">t3</stringProp>
+            <stringProp name="queryType">Select Statement</stringProp>
+            <stringProp name="query">SELECT 
+    AccountID, 
+    COUNT(*) AS TransactionCount, 
+    SUM(Amount) AS TotalTransactionAmount
+FROM 
+    BankTransactions
+WHERE 
+    TransactionDate &gt;= DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 30 + 1) DAY)
+GROUP BY 
+    AccountID
+ORDER BY 
+    TotalTransactionAmount DESC;
+</stringProp>
+            <stringProp name="queryArguments"></stringProp>
+            <stringProp name="queryArgumentsTypes"></stringProp>
+            <stringProp name="variableNames"></stringProp>
+            <stringProp name="resultVariable"></stringProp>
+            <stringProp name="queryTimeout"></stringProp>
+            <stringProp name="resultSetMaxRows"></stringProp>
+            <stringProp name="resultSetHandler">Store as String</stringProp>
+          </JDBCSampler>
+          <hashTree/>
+          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="OLTP_隨機刪除特定時間範圍內的已取消交易">
+            <stringProp name="dataSource">t3</stringProp>
+            <stringProp name="queryType">Update Statement</stringProp>
+            <stringProp name="query">DELETE FROM BankTransactions
+WHERE TransactionStatus = &apos;Cancelled&apos; 
+AND TransactionDate BETWEEN DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 10 + 1) DAY) 
+                        AND NOW();
+</stringProp>
+            <stringProp name="queryArguments"></stringProp>
+            <stringProp name="queryArgumentsTypes"></stringProp>
+            <stringProp name="variableNames"></stringProp>
+            <stringProp name="resultVariable"></stringProp>
+            <stringProp name="queryTimeout"></stringProp>
+            <stringProp name="resultSetMaxRows"></stringProp>
+            <stringProp name="resultSetHandler">Store as String</stringProp>
+          </JDBCSampler>
+          <hashTree/>
+          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="OLAP_按月匯總交易金額與手續費">
+            <stringProp name="dataSource">t3</stringProp>
+            <stringProp name="query">SELECT 
+    DATE_FORMAT(TransactionDate, &apos;%Y-%m&apos;) AS Month, 
+    TransactionType,
+    SUM(Amount) AS TotalTransactionAmount,
+    SUM(Fee) AS TotalFees
+FROM BankTransactions
+WHERE TransactionDate &gt;= DATE_SUB(CURDATE(), INTERVAL FLOOR(RAND() * 12) MONTH)
+GROUP BY Month, TransactionType
+ORDER BY Month ASC, TransactionType;
+</stringProp>
+            <stringProp name="queryArguments"></stringProp>
+            <stringProp name="queryArgumentsTypes"></stringProp>
+            <stringProp name="queryTimeout"></stringProp>
+            <stringProp name="queryType">Select Statement</stringProp>
+            <stringProp name="resultSetHandler">Store as String</stringProp>
+            <stringProp name="resultSetMaxRows"></stringProp>
+            <stringProp name="resultVariable"></stringProp>
+            <stringProp name="variableNames"></stringProp>
+          </JDBCSampler>
+          <hashTree/>
+          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="OLAP_找出每個帳戶的總交易次數和最大交易金額">
+            <stringProp name="dataSource">t3</stringProp>
+            <stringProp name="queryType">Select Statement</stringProp>
+            <stringProp name="query">SELECT 
+    AccountID, 
+    COUNT(TransactionID) AS TransactionCount,
+    MAX(Amount) AS MaxTransactionAmount,
+    AVG(BalanceAfterTransaction) AS AvgBalance
+FROM BankTransactions
+WHERE TransactionDate BETWEEN DATE_SUB(CURDATE(), INTERVAL FLOOR(RAND() * 365) DAY) AND CURDATE()
+GROUP BY AccountID
+ORDER BY TransactionCount DESC
+LIMIT 10;
+</stringProp>
+            <stringProp name="queryArguments"></stringProp>
+            <stringProp name="queryArgumentsTypes"></stringProp>
+            <stringProp name="variableNames"></stringProp>
+            <stringProp name="resultVariable"></stringProp>
+            <stringProp name="queryTimeout"></stringProp>
+            <stringProp name="resultSetMaxRows"></stringProp>
+            <stringProp name="resultSetHandler">Store as String</stringProp>
+          </JDBCSampler>
+          <hashTree/>
+          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="OLAP_根據交易狀態進行匯總分析">
+            <stringProp name="dataSource">t3</stringProp>
+            <stringProp name="queryType">Select Statement</stringProp>
+            <stringProp name="query">SELECT 
+    TransactionStatus, 
+    COUNT(*) AS TransactionCount,
+    SUM(Amount) AS TotalTransactionAmount
+FROM BankTransactions
+GROUP BY TransactionStatus
+ORDER BY TransactionCount DESC;
+</stringProp>
+            <stringProp name="queryArguments"></stringProp>
+            <stringProp name="queryArgumentsTypes"></stringProp>
+            <stringProp name="variableNames"></stringProp>
+            <stringProp name="resultVariable"></stringProp>
+            <stringProp name="queryTimeout"></stringProp>
+            <stringProp name="resultSetMaxRows"></stringProp>
+            <stringProp name="resultSetHandler">Store as String</stringProp>
+          </JDBCSampler>
+          <hashTree/>
+          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="OLAP_隨機時間範圍內的每日交易數量">
+            <stringProp name="dataSource">t3</stringProp>
+            <stringProp name="queryType">Select Statement</stringProp>
+            <stringProp name="query">SELECT 
+    DATE(TransactionDate) AS TransactionDay, 
+    COUNT(*) AS TotalTransactions,
+    SUM(Amount) AS TotalAmount
+FROM BankTransactions
+WHERE TransactionDate &gt;= DATE_SUB(CURDATE(), INTERVAL FLOOR(RAND() * 30 + 7) DAY)
+  AND TransactionDate &lt; CURDATE()
+GROUP BY DATE(TransactionDate)
+ORDER BY TransactionDay;
+
+</stringProp>
+            <stringProp name="queryArguments"></stringProp>
+            <stringProp name="queryArgumentsTypes"></stringProp>
+            <stringProp name="variableNames"></stringProp>
+            <stringProp name="resultVariable"></stringProp>
+            <stringProp name="queryTimeout"></stringProp>
+            <stringProp name="resultSetMaxRows"></stringProp>
+            <stringProp name="resultSetHandler">Store as String</stringProp>
+          </JDBCSampler>
+          <hashTree/>
+          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="OLAP_計算交易量前 10 名帳戶及總金額">
+            <stringProp name="dataSource">t3</stringProp>
+            <stringProp name="queryType">Select Statement</stringProp>
+            <stringProp name="query">SELECT 
+    AccountID, 
+    COUNT(TransactionID) AS TransactionCount, 
+    SUM(Amount) AS TotalAmount
+FROM BankTransactions
+GROUP BY AccountID
+ORDER BY TotalAmount DESC
+LIMIT 10;
+</stringProp>
+            <stringProp name="queryArguments"></stringProp>
+            <stringProp name="queryArgumentsTypes"></stringProp>
+            <stringProp name="variableNames"></stringProp>
+            <stringProp name="resultVariable"></stringProp>
+            <stringProp name="queryTimeout"></stringProp>
+            <stringProp name="resultSetMaxRows"></stringProp>
+            <stringProp name="resultSetHandler">Store as String</stringProp>
+          </JDBCSampler>
+          <hashTree/>
+          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="OLAP_根據交易描述篩選並統計交易 ">
+            <stringProp name="dataSource">t3</stringProp>
+            <stringProp name="queryType">Select Statement</stringProp>
+            <stringProp name="query">SELECT 
+    Description, 
+    COUNT(*) AS TransactionCount,
+    SUM(Amount) AS TotalAmount
+FROM BankTransactions
+WHERE Description LIKE CONCAT(&apos;%&apos;, CASE FLOOR(RAND() * 3) 
+    WHEN 0 THEN &apos;Payment&apos; 
+    WHEN 1 THEN &apos;Transfer&apos; 
+    ELSE &apos;Fee&apos; END, &apos;%&apos;)
+GROUP BY Description
+ORDER BY TransactionCount DESC;
+</stringProp>
+            <stringProp name="queryArguments"></stringProp>
+            <stringProp name="queryArgumentsTypes"></stringProp>
+            <stringProp name="variableNames"></stringProp>
+            <stringProp name="resultVariable"></stringProp>
+            <stringProp name="queryTimeout"></stringProp>
+            <stringProp name="resultSetMaxRows"></stringProp>
+            <stringProp name="resultSetHandler">Store as String</stringProp>
+          </JDBCSampler>
+          <hashTree/>
+          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="OLAP_平均餘額按交易類型匯總">
+            <stringProp name="dataSource">t3</stringProp>
+            <stringProp name="queryType">Select Statement</stringProp>
+            <stringProp name="query">SELECT 
+    TransactionType, 
+    AVG(BalanceAfterTransaction) AS AvgBalance, 
+    MAX(Amount) AS MaxTransactionAmount
+FROM BankTransactions
+GROUP BY TransactionType
+ORDER BY AvgBalance DESC;
+</stringProp>
+            <stringProp name="queryArguments"></stringProp>
+            <stringProp name="queryArgumentsTypes"></stringProp>
+            <stringProp name="variableNames"></stringProp>
+            <stringProp name="resultVariable"></stringProp>
+            <stringProp name="queryTimeout"></stringProp>
+            <stringProp name="resultSetMaxRows"></stringProp>
+            <stringProp name="resultSetHandler">Store as String</stringProp>
+          </JDBCSampler>
+          <hashTree/>
+          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="OLAP_交易金額區間分析">
+            <stringProp name="dataSource">t3</stringProp>
+            <stringProp name="queryType">Select Statement</stringProp>
+            <stringProp name="query">SELECT 
+    CASE 
+        WHEN Amount &lt; 100 THEN &apos;Low (&lt;100)&apos;
+        WHEN Amount BETWEEN 100 AND 1000 THEN &apos;Medium (100-1000)&apos;
+        ELSE &apos;High (&gt;1000)&apos;
+    END AS AmountRange,
+    COUNT(*) AS TransactionCount,
+    SUM(Amount) AS TotalAmount
+FROM BankTransactions
+GROUP BY AmountRange
+ORDER BY TotalAmount DESC;
+</stringProp>
+            <stringProp name="queryArguments"></stringProp>
+            <stringProp name="queryArgumentsTypes"></stringProp>
+            <stringProp name="variableNames"></stringProp>
+            <stringProp name="resultVariable"></stringProp>
+            <stringProp name="queryTimeout"></stringProp>
+            <stringProp name="resultSetMaxRows"></stringProp>
+            <stringProp name="resultSetHandler">Store as String</stringProp>
+          </JDBCSampler>
+          <hashTree/>
+        </hashTree>
+      </hashTree>
+      <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report">
+        <boolProp name="ResultCollector.error_logging">false</boolProp>
+        <objProp>
+          <name>saveConfig</name>
+          <value class="SampleSaveConfiguration">
+            <time>true</time>
+            <latency>true</latency>
+            <timestamp>true</timestamp>
+            <success>true</success>
+            <label>true</label>
+            <code>true</code>
+            <message>true</message>
+            <threadName>true</threadName>
+            <dataType>true</dataType>
+            <encoding>false</encoding>
+            <assertions>true</assertions>
+            <subresults>true</subresults>
+            <responseData>false</responseData>
+            <samplerData>false</samplerData>
+            <xml>false</xml>
+            <fieldNames>true</fieldNames>
+            <responseHeaders>false</responseHeaders>
+            <requestHeaders>false</requestHeaders>
+            <responseDataOnError>false</responseDataOnError>
+            <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+            <assertionsResultsToSave>0</assertionsResultsToSave>
+            <bytes>true</bytes>
+            <sentBytes>true</sentBytes>
+            <url>true</url>
+            <threadCounts>true</threadCounts>
+            <idleTime>true</idleTime>
+            <connectTime>true</connectTime>
+          </value>
+        </objProp>
+        <stringProp name="filename"></stringProp>
+      </ResultCollector>
+      <hashTree/>
+      <ResultCollector guiclass="GraphVisualizer" testclass="ResultCollector" testname="結果圖形" enabled="true">
+        <boolProp name="ResultCollector.error_logging">false</boolProp>
+        <objProp>
+          <name>saveConfig</name>
+          <value class="SampleSaveConfiguration">
+            <time>true</time>
+            <latency>true</latency>
+            <timestamp>true</timestamp>
+            <success>true</success>
+            <label>true</label>
+            <code>true</code>
+            <message>true</message>
+            <threadName>true</threadName>
+            <dataType>true</dataType>
+            <encoding>false</encoding>
+            <assertions>true</assertions>
+            <subresults>true</subresults>
+            <responseData>false</responseData>
+            <samplerData>false</samplerData>
+            <xml>false</xml>
+            <fieldNames>true</fieldNames>
+            <responseHeaders>false</responseHeaders>
+            <requestHeaders>false</requestHeaders>
+            <responseDataOnError>false</responseDataOnError>
+            <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+            <assertionsResultsToSave>0</assertionsResultsToSave>
+            <bytes>true</bytes>
+            <sentBytes>true</sentBytes>
+            <url>true</url>
+            <threadCounts>true</threadCounts>
+            <idleTime>true</idleTime>
+            <connectTime>true</connectTime>
+          </value>
+        </objProp>
+        <stringProp name="filename"></stringProp>
+      </ResultCollector>
+      <hashTree/>
+      <ResultCollector guiclass="StatGraphVisualizer" testclass="ResultCollector" testname="Aggregate Graph" enabled="true">
+        <boolProp name="ResultCollector.error_logging">false</boolProp>
+        <objProp>
+          <name>saveConfig</name>
+          <value class="SampleSaveConfiguration">
+            <time>true</time>
+            <latency>true</latency>
+            <timestamp>true</timestamp>
+            <success>true</success>
+            <label>true</label>
+            <code>true</code>
+            <message>true</message>
+            <threadName>true</threadName>
+            <dataType>true</dataType>
+            <encoding>false</encoding>
+            <assertions>true</assertions>
+            <subresults>true</subresults>
+            <responseData>false</responseData>
+            <samplerData>false</samplerData>
+            <xml>false</xml>
+            <fieldNames>true</fieldNames>
+            <responseHeaders>false</responseHeaders>
+            <requestHeaders>false</requestHeaders>
+            <responseDataOnError>false</responseDataOnError>
+            <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+            <assertionsResultsToSave>0</assertionsResultsToSave>
+            <bytes>true</bytes>
+            <sentBytes>true</sentBytes>
+            <url>true</url>
+            <threadCounts>true</threadCounts>
+            <idleTime>true</idleTime>
+            <connectTime>true</connectTime>
+          </value>
+        </objProp>
+        <stringProp name="filename"></stringProp>
+      </ResultCollector>
+      <hashTree/>
+      <ResultCollector guiclass="RespTimeGraphVisualizer" testclass="ResultCollector" testname="Response Time Graph" enabled="true">
+        <boolProp name="ResultCollector.error_logging">false</boolProp>
+        <objProp>
+          <name>saveConfig</name>
+          <value class="SampleSaveConfiguration">
+            <time>true</time>
+            <latency>true</latency>
+            <timestamp>true</timestamp>
+            <success>true</success>
+            <label>true</label>
+            <code>true</code>
+            <message>true</message>
+            <threadName>true</threadName>
+            <dataType>true</dataType>
+            <encoding>false</encoding>
+            <assertions>true</assertions>
+            <subresults>true</subresults>
+            <responseData>false</responseData>
+            <samplerData>false</samplerData>
+            <xml>false</xml>
+            <fieldNames>true</fieldNames>
+            <responseHeaders>false</responseHeaders>
+            <requestHeaders>false</requestHeaders>
+            <responseDataOnError>false</responseDataOnError>
+            <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+            <assertionsResultsToSave>0</assertionsResultsToSave>
+            <bytes>true</bytes>
+            <sentBytes>true</sentBytes>
+            <url>true</url>
+            <threadCounts>true</threadCounts>
+            <idleTime>true</idleTime>
+            <connectTime>true</connectTime>
+          </value>
+        </objProp>
+        <stringProp name="filename">C:\Users\user\OneDrive\桌面\JDBC Connection Configuration2.jmx</stringProp>
+      </ResultCollector>
+      <hashTree/>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>
