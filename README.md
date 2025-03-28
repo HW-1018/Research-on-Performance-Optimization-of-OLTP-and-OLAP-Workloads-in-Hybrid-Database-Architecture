@@ -1,6 +1,6 @@
 # Research-on-Performance-Optimization-of-OLTP-and-OLAP-Workloads-in-Hybrid-Database-Architecture
 
-本專案以模擬 OLTP, OLAP 比較 HYBRID 情況下 response time, throughput, CPU usage 的效能變化，並以單核、多核 CPU 為變因探討
+本專案以模擬 OLTP, OLAP 比較 HYBRID 情況下 response time, throughput, CPU usage 的效能變化，並以單核、多核 CPU 為變因探討。
 ## 1. 安裝與啟動 SingleStore (Docker )
 
 ### 1.1 安裝 Docker
